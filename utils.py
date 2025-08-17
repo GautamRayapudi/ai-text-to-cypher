@@ -3,6 +3,18 @@ import streamlit as st
 from sentence_transformers import SentenceTransformer
 import numpy as np
 import re
+import sys
+"""
+Ensure chromadb sees a modern sqlite3 by monkeypatching with pysqlite3 if the
+system sqlite3 is too old (e.g., on some hosted environments).
+"""
+try:
+    import pysqlite3 as _pysqlite3  # type: ignore
+    sys.modules["sqlite3"] = sys.modules.pop("pysqlite3")
+except Exception:
+    # If pysqlite3 isn't available, fall back; chromadb may still work if sqlite3 is new enough
+    pass
+
 import chromadb
 import os
 import csv
@@ -183,4 +195,5 @@ def save_feedback(user_query, cypher_query, reason=None):
         if not file_exists:
             writer.writerow(["user_query", "cypher_query", "reason"])
         writer.writerow([user_query, cypher_query, reason if reason else ""])
+
     print(f"[DEBUG] Feedback saved: query={user_query}, cypher={cypher_query}, reason={reason}")
