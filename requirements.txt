@@ -1,0 +1,10 @@
+streamlit
+sentence-transformers
+numpy
+regex
+neo4j
+chromadb
+google-generativeai
+pandas
+python-dotenv
+ratelimit
