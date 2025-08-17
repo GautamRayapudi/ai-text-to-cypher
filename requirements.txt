@@ -11,3 +11,4 @@ torch
 transformers
 scikit-learn
 ratelimit
+pysqlite3-binary
