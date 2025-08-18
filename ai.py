@@ -1,4 +1,3 @@
-# ai.py
 import re
 from ratelimit import limits, sleep_and_retry
 import google.generativeai as genai
@@ -117,26 +116,41 @@ def process_user_query(user_query: str, field_collection, api_key: str):
 
     lines = cypher_query.split('\n')
     cleaned_lines = []
-    found_with = False
-    skip_until_with = False
-    for line in lines:
-        if line.strip().startswith('WITH'):
-            found_with = True
-            skip_until_with = False
-        if not found_with and line.strip().startswith('WHERE'):
-            skip_until_with = True
-            continue
-        if skip_until_with:
+    first_with_idx = None
+    pre_with_wheres = []
+    for idx, line in enumerate(lines):
+        stripped = line.strip()
+        if stripped.startswith('WITH') and first_with_idx is None:
+            first_with_idx = len(cleaned_lines)
+        # Collect WHEREs before the first WITH and skip them for now
+        if first_with_idx is None and stripped.startswith('WHERE'):
+            pre_with_wheres.append(line)
             continue
         cleaned_lines.append(line)
+
+    # Determine if the first WITH is aggregating
+    def is_aggregating_with(ln: str) -> bool:
+        s = ln.lower()
+        return ' distinct ' in f" {s} " or 'avg(' in s or 'count(' in s or 'sum(' in s or 'min(' in s or 'max(' in s
+
+    if first_with_idx is not None:
+        # If LLM placed a WHERE immediately after an aggregating WITH referencing base vars, move it before the WITH
+        if first_with_idx + 1 < len(cleaned_lines):
+            with_line = cleaned_lines[first_with_idx]
+            next_line = cleaned_lines[first_with_idx + 1]
+            if next_line.strip().startswith('WHERE') and is_aggregating_with(with_line):
+                # Move this WHERE to before the WITH
+                moved_where = cleaned_lines.pop(first_with_idx + 1)
+                pre_with_wheres.append(moved_where)
+
+        # Insert constraints and any collected WHEREs before the first WITH to keep variables in scope
+        insertion_block = []
+        if constraints_cypher:
+            insertion_block.append(constraints_cypher)
+        insertion_block.extend(pre_with_wheres)
+        if insertion_block:
+            cleaned_lines[first_with_idx:first_with_idx] = insertion_block
+
     cleaned_cypher = '\n'.join(cleaned_lines)
-
-    if constraints_cypher and constraints_cypher not in cleaned_cypher:
-        for i, line in enumerate(cleaned_lines):
-            if line.strip().startswith('WITH'):
-                cleaned_lines.insert(i + 1, constraints_cypher)
-                break
-        cleaned_cypher = '\n'.join(cleaned_lines)
-
 
     return cleaned_cypher, constraints
