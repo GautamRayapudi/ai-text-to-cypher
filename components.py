@@ -66,12 +66,14 @@ def render_results_and_feedback(debug_on: bool):
     
     if feedback == "Yes":
         if st.button("Submit Feedback", key="yes_feedback_submit"):
-            data_csv = save_feedback(user_query, cypher_query, "")
+            # Check if we should append to existing dataframe
+            append_mode = st.session_state.get("query_count", 0) > 0
+            data_csv = save_feedback(user_query, cypher_query, "", append_mode=append_mode)
             st.success("✅ Thank you for the feedback!")
-            if not data_csv.empty:  # Updated condition
+            if not data_csv.empty:
                 st.download_button(
                     label="📥 Download CSV",
-                    data=data_csv.to_csv(index=False),  # Convert to CSV string
+                    data=data_csv.to_csv(index=False),
                     file_name=f"query_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
                     key="csv_after_yes"
@@ -85,12 +87,14 @@ def render_results_and_feedback(debug_on: bool):
         )
         if st.button("Submit Feedback", key="no_feedback_submit"):
             if reason.strip():
-                data_csv = save_feedback(user_query, cypher_query, reason.strip())
+                # Check if we should append to existing dataframe
+                append_mode = st.session_state.get("query_count", 0) > 0
+                data_csv = save_feedback(user_query, cypher_query, reason.strip(), append_mode=append_mode)
                 st.success("🙏 Thank you for the feedback! We'll use this to improve.")
-                if not data_csv.empty:  # Updated condition
+                if not data_csv.empty:
                     st.download_button(
                         label="📥 Download CSV",
-                        data=data_csv.to_csv(index=False),  # Convert to CSV string
+                        data=data_csv.to_csv(index=False),
                         file_name=f"query_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                         mime="text/csv",
                         key="csv_after_no"
@@ -108,7 +112,5 @@ def render_results_and_feedback(debug_on: bool):
                 "feedback_reason_len": len(st.session_state.get("feedback_reason", "")),
                 "feedback_submitted": st.session_state.get("feedback_submitted"),
                 "feedback_saved_key": st.session_state.get("feedback_saved_key"),
-
+                "query_count": st.session_state.get("query_count", 0),  # Added for debugging
             })
-
-
