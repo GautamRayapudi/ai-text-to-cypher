@@ -68,15 +68,15 @@ def render_results_and_feedback(debug_on: bool):
         if st.button("Submit Feedback", key="yes_feedback_submit"):
             data_csv = save_feedback(user_query, cypher_query, "")
             st.success("✅ Thank you for the feedback!")
-            if data_csv:
+            if not data_csv.empty:  # Updated condition
                 st.download_button(
                     label="📥 Download CSV",
-                    data=data_csv,
+                    data=data_csv.to_csv(index=False),  # Convert to CSV string
                     file_name=f"query_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
                     key="csv_after_yes"
                 )
-    
+
     elif feedback == "No":
         reason = st.text_area(
             "Please tell us why you are not satisfied:",
@@ -87,10 +87,10 @@ def render_results_and_feedback(debug_on: bool):
             if reason.strip():
                 data_csv = save_feedback(user_query, cypher_query, reason.strip())
                 st.success("🙏 Thank you for the feedback! We'll use this to improve.")
-                if data_csv:
+                if not data_csv.empty:  # Updated condition
                     st.download_button(
                         label="📥 Download CSV",
-                        data=data_csv,
+                        data=data_csv.to_csv(index=False),  # Convert to CSV string
                         file_name=f"query_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                         mime="text/csv",
                         key="csv_after_no"
@@ -110,4 +110,5 @@ def render_results_and_feedback(debug_on: bool):
                 "feedback_saved_key": st.session_state.get("feedback_saved_key"),
 
             })
+
 
