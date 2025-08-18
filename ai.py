@@ -2,7 +2,7 @@
 import re
 from ratelimit import limits, sleep_and_retry
 import google.generativeai as genai
-from config import TEMPLATE_PROMPT, CROP_FIELDS, DATE_FIELDS
+from config import TEMPLATE_PROMPT, CROP_FIELDS, DATE_FIELDS, SIMILARITY_THRESHOLD
 from utils import extract_field_references, match_field, extract_constraints
 import streamlit as st
 
@@ -137,5 +137,6 @@ def process_user_query(user_query: str, field_collection, api_key: str):
                 cleaned_lines.insert(i + 1, constraints_cypher)
                 break
         cleaned_cypher = '\n'.join(cleaned_lines)
+
 
     return cleaned_cypher, constraints
