@@ -63,23 +63,15 @@ def render_results_and_feedback(debug_on: bool):
     st.subheader("📝 Was this result helpful?")
 
     feedback = st.radio("Please select:", ["Yes", "No"], horizontal=True, index=None, key="feedback_choice")
-
-    csv_download = None
-    if records:
-        df = pd.DataFrame(records)
-        for col in df.columns:
-            if df[col].dtype == 'object':
-                df[col] = df[col].astype(str).replace('None', None)
-        csv_download = df.to_csv(index=False)
     
     if feedback == "Yes":
         if st.button("Submit Feedback", key="yes_feedback_submit"):
-            save_feedback(user_query, cypher_query, "")
+            data_csv = save_feedback(user_query, cypher_query, "")
             st.success("✅ Thank you for the feedback!")
-            if csv_download:
+            if data_csv:
                 st.download_button(
-                    label="📥 Download Results as CSV",
-                    data=csv_download,
+                    label="📥 Download CSV",
+                    data=data_csv,
                     file_name=f"query_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
                     key="csv_after_yes"
@@ -93,12 +85,12 @@ def render_results_and_feedback(debug_on: bool):
         )
         if st.button("Submit Feedback", key="no_feedback_submit"):
             if reason.strip():
-                save_feedback(user_query, cypher_query, reason.strip())
+                data_csv = save_feedback(user_query, cypher_query, reason.strip())
                 st.success("🙏 Thank you for the feedback! We'll use this to improve.")
-                if csv_download:
+                if data_csv:
                     st.download_button(
-                        label="📥 Download Results as CSV",
-                        data=csv_download,
+                        label="📥 Download CSV",
+                        data=data_csv,
                         file_name=f"query_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                         mime="text/csv",
                         key="csv_after_no"
@@ -118,3 +110,4 @@ def render_results_and_feedback(debug_on: bool):
                 "feedback_saved_key": st.session_state.get("feedback_saved_key"),
 
             })
+
