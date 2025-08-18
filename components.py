@@ -1,4 +1,3 @@
-# components.py
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -65,11 +64,27 @@ def render_results_and_feedback(debug_on: bool):
 
     feedback = st.radio("Please select:", ["Yes", "No"], horizontal=True, index=None, key="feedback_choice")
 
+    csv_download = None
+    if records:
+        df = pd.DataFrame(records)
+        for col in df.columns:
+            if df[col].dtype == 'object':
+                df[col] = df[col].astype(str).replace('None', None)
+        csv_download = df.to_csv(index=False)
+    
     if feedback == "Yes":
         if st.button("Submit Feedback", key="yes_feedback_submit"):
             save_feedback(user_query, cypher_query, "")
             st.success("✅ Thank you for the feedback!")
-
+            if csv_download:
+                st.download_button(
+                    label="📥 Download Results as CSV",
+                    data=csv_download,
+                    file_name=f"query_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                    mime="text/csv",
+                    key="csv_after_yes"
+                )
+    
     elif feedback == "No":
         reason = st.text_area(
             "Please tell us why you are not satisfied:",
@@ -80,6 +95,14 @@ def render_results_and_feedback(debug_on: bool):
             if reason.strip():
                 save_feedback(user_query, cypher_query, reason.strip())
                 st.success("🙏 Thank you for the feedback! We'll use this to improve.")
+                if csv_download:
+                    st.download_button(
+                        label="📥 Download Results as CSV",
+                        data=csv_download,
+                        file_name=f"query_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                        mime="text/csv",
+                        key="csv_after_no"
+                    )
             else:
                 st.warning("⚠️ Please provide a reason before submitting.")
 
@@ -93,4 +116,5 @@ def render_results_and_feedback(debug_on: bool):
                 "feedback_reason_len": len(st.session_state.get("feedback_reason", "")),
                 "feedback_submitted": st.session_state.get("feedback_submitted"),
                 "feedback_saved_key": st.session_state.get("feedback_saved_key"),
+
             })
