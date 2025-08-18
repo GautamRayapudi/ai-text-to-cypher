@@ -186,18 +186,34 @@ def extract_constraints(user_query, field_collection):
                         constraints.append((farmer_field, "=", match.strip()))
     return constraints
 
-def save_feedback(user_query, cypher_query, reason=None):
+def save_feedback(user_query, cypher_query, reason=None, append_mode=False):
     """Convert feedback into a pandas DataFrame with query, cypher, reason columns"""
-    data = {
+    # Create new feedback entry
+    new_data = {
         "user_query": [user_query],
         "cypher_query": [cypher_query],
         "reason": [reason if reason else ""]
     }
-    df = pd.DataFrame(data)
-    for col in df.columns:
-        if df[col].dtype == 'object':
-            df[col] = df[col].astype(str).replace('None', None)
-    print(f"[DEBUG] Feedback DataFrame created: query={user_query}, cypher={cypher_query}, reason={reason}")
-    return df
+    new_df = pd.DataFrame(new_data)
+    
+    # Clean the new dataframe
+    for col in new_df.columns:
+        if new_df[col].dtype == 'object':
+            new_df[col] = new_df[col].astype(str).replace('None', None)
+    
+    if append_mode and 'feedback_dataframe' in st.session_state:
+        # Append to existing dataframe
+        existing_df = st.session_state['feedback_dataframe']
+        combined_df = pd.concat([existing_df, new_df], ignore_index=True)
+        st.session_state['feedback_dataframe'] = combined_df
+        print(f"[DEBUG] Feedback appended to existing DataFrame: query={user_query}, cypher={cypher_query}, reason={reason}")
+        print(f"[DEBUG] Total feedback entries: {len(combined_df)}")
+        return combined_df
+    else:
+        # Create new dataframe or replace existing one
+        st.session_state['feedback_dataframe'] = new_df
+        print(f"[DEBUG] New Feedback DataFrame created: query={user_query}, cypher={cypher_query}, reason={reason}")
+        return new_df
+
 
 
