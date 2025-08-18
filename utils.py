@@ -1,4 +1,3 @@
-# utils.py
 import streamlit as st
 from sentence_transformers import SentenceTransformer
 import numpy as np
@@ -20,6 +19,10 @@ import os
 import csv
 from config import FIELD_ALIASES, SIMILARITY_THRESHOLD, CROP_FIELDS
 import pandas as pd
+
+# Simple in-memory cache for field matching results within a session run
+# Keyed by lowercased user term. Value: tuple(canonical_field, matched_document, similarity)
+_MATCH_FIELD_CACHE: dict[str, tuple[str | None, str | None, float]] = {}
 
 @st.cache_resource
 def load_sentence_transformer():
@@ -63,6 +66,10 @@ def initialize_vector_store():
         return collection
 
 def match_field(user_term, field_collection, threshold=SIMILARITY_THRESHOLD):
+    cache_key = (user_term or "").lower().strip()
+    if cache_key in _MATCH_FIELD_CACHE:
+        return _MATCH_FIELD_CACHE[cache_key]
+
     model = load_sentence_transformer()
     try:
         query_embedding = model.encode([user_term], normalize_embeddings=True)
@@ -75,15 +82,15 @@ def match_field(user_term, field_collection, threshold=SIMILARITY_THRESHOLD):
             canonical_field = results['metadatas'][0][0]['canonical_field']
             matched_document = results['documents'][0][0]
             similarity_score = 1 - results['distances'][0][0]
-            if similarity_score >= threshold:
-                return canonical_field, matched_document, similarity_score
-            else:
-                return None, None, similarity_score
+            out = (canonical_field, matched_document, similarity_score) if similarity_score >= threshold else (None, None, similarity_score)
         else:
-            return None, None, 0
+            out = (None, None, 0)
     except Exception as e:
         st.error(f"Error matching field '{user_term}': {e}")
-        return None, None, 0
+        out = (None, None, 0)
+
+    _MATCH_FIELD_CACHE[cache_key] = out
+    return out
 
 def extract_field_references(user_query, field_collection):
     potential_fields = set()
@@ -214,6 +221,3 @@ def save_feedback(user_query, cypher_query, reason=None, append_mode=False):
         st.session_state['feedback_dataframe'] = new_df
         print(f"[DEBUG] New Feedback DataFrame created: query={user_query}, cypher={cypher_query}, reason={reason}")
         return new_df
-
-
-
