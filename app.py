@@ -55,44 +55,9 @@ def main():
     # Initialize vector store
     field_collection = initialize_vector_store()
     api_key = os.getenv("GEMINI_API_KEY")
-
-    # Sidebar
-    with st.sidebar:
-        st.header("⚙️ Configuration")
-        # Neo4j connection details
-        st.subheader("Neo4j Connection")
-        neo4j_uri = st.text_input("Neo4j URI")
-        if neo4j_uri == "":
-            st.info("Enter your Neo4j URI above.")
-        elif not neo4j_uri.strip():
-            st.error("Please enter a valid Neo4j URI.")
-        neo4j_user = st.text_input("Username")
-        if neo4j_user == "":
-            st.info("Enter your username above.")
-        elif not neo4j_user.strip():
-            st.error("Please enter a valid username.")
-        neo4j_password = st.text_input("Password", type="password")
-        if neo4j_password == "":
-            st.info("Enter your password above.")
-        elif not neo4j_password.strip():
-            st.error("Please enter a valid password.")
-
-        st.subheader("Gemini API Key")
-        api_key = st.text_input("API Key", type="password")
-
-        if api_key == "":
-            st.info("Enter your API key above.")
-        elif not api_key.strip():
-            st.error("Please enter a valid API key.")
-
-        # Field aliases info
-        st.subheader("📚 Supported Fields")
-        with st.expander("View Field Aliases"):
-            for field, aliases in FIELD_ALIASES.items():
-                st.write(f"**{field}**: {', '.join(aliases)}")
-
-        st.subheader("🐞 Debug")
-        debug_feedback = st.toggle("Enable Feedback Debug", value=False, key="debug_feedback_toggle")
+    neo4j_uri = os.getenv("NEO4J_URI")
+    neo4j_user = os.getenv("NEO4J_USER")
+    neo4j_password = os.getenv("NEO4J_PASSWORD")
 
     # Main UI
     c1, c2 = st.columns([2, 1])
@@ -157,4 +122,5 @@ def main():
     )
 
 if __name__ == "__main__":
+
     main()
