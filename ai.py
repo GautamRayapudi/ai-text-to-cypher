@@ -9,12 +9,17 @@ import streamlit as st
 CALLS = 20
 PERIOD = 60  # 60 seconds = 1 minute
 
+@st.cache_resource(show_spinner=False)
+def get_gemini_model(api_key: str):
+    """Cache and return a configured Gemini model to avoid per-call setup overhead."""
+    genai.configure(api_key=api_key)
+    return genai.GenerativeModel('gemini-2.0-flash')
+
 @sleep_and_retry
 @limits(calls=CALLS, period=PERIOD)
 def gemini_api_call(prompt: str, api_key: str) -> str:
     try:
-        genai.configure(api_key=api_key)
-        model = genai.GenerativeModel('gemini-2.0-flash')
+        model = get_gemini_model(api_key)
         response = model.generate_content(
             prompt,
             generation_config=genai.types.GenerationConfig(
