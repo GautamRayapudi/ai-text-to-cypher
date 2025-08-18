@@ -194,6 +194,10 @@ def save_feedback(user_query, cypher_query, reason=None):
         "reason": [reason if reason else ""]
     }
     df = pd.DataFrame(data)
+    for col in df.columns:
+        if df[col].dtype == 'object':
+            df[col] = df[col].astype(str).replace('None', None)
     print(f"[DEBUG] Feedback DataFrame created: query={user_query}, cypher={cypher_query}, reason={reason}")
     return df
+
 
