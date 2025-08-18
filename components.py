@@ -25,10 +25,10 @@ def render_results_and_feedback(debug_on: bool):
     cypher_query = st.session_state.get("last_cypher_query", "")
     records = st.session_state.get("last_records", []) or []
 
-    st.markdown('<div class="query-box">', unsafe_allow_html=True)
-    st.subheader("⚡ Generated Cypher Query")
-    st.code(cypher_query, language='cypher')
-    st.markdown('</div>', unsafe_allow_html=True)
+    # st.markdown('<div class="query-box">', unsafe_allow_html=True)
+    # st.subheader("⚡ Generated Cypher Query")
+    # st.code(cypher_query, language='cypher')
+    # st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown('<div class="result-box">', unsafe_allow_html=True)
     st.subheader(f"📋 Query Results ({len(records)} records)")
@@ -114,3 +114,4 @@ def render_results_and_feedback(debug_on: bool):
                 "feedback_saved_key": st.session_state.get("feedback_saved_key"),
                 "query_count": st.session_state.get("query_count", 0),  # Added for debugging
             })
+
