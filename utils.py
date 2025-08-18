@@ -19,6 +19,7 @@ import chromadb
 import os
 import csv
 from config import FIELD_ALIASES, SIMILARITY_THRESHOLD, CROP_FIELDS
+import pandas as pd
 
 @st.cache_resource
 def load_sentence_transformer():
@@ -186,14 +187,13 @@ def extract_constraints(user_query, field_collection):
     return constraints
 
 def save_feedback(user_query, cypher_query, reason=None):
-    """Save feedback into a CSV file with only query, cypher, reason"""
-    feedback_file = "user_feedback.csv"
-    file_exists = os.path.isfile(feedback_file)
+    """Convert feedback into a pandas DataFrame with query, cypher, reason columns"""
+    data = {
+        "user_query": [user_query],
+        "cypher_query": [cypher_query],
+        "reason": [reason if reason else ""]
+    }
+    df = pd.DataFrame(data)
+    print(f"[DEBUG] Feedback DataFrame created: query={user_query}, cypher={cypher_query}, reason={reason}")
+    return df
 
-    with open(feedback_file, mode="a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        if not file_exists:
-            writer.writerow(["user_query", "cypher_query", "reason"])
-        writer.writerow([user_query, cypher_query, reason if reason else ""])
-
-    print(f"[DEBUG] Feedback saved: query={user_query}, cypher={cypher_query}, reason={reason}")
