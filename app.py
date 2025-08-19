@@ -120,9 +120,7 @@ def main():
 
                 # Display optimization info
                 st.markdown('<div class="optimization-box">', unsafe_allow_html=True)
-                st.success(f"🤖 **Constraint-only generation completed** in {processing_ms}ms")
-                st.write("• Generated constraints instead of full query")
-                st.write("• Reduced token usage and faster response")
+                st.success(f"🤖 **Query generation completed** in {processing_ms}ms")
                 st.markdown('</div>', unsafe_allow_html=True)
 
                 # Display generated constraints
@@ -130,12 +128,12 @@ def main():
                 st.markdown('<div class="query-box">', unsafe_allow_html=True)
                 st.subheader("🔍 Generated Constraints")
                 
-                if ai_constraints:
-                    st.code(ai_constraints, language="cypher")
-                    st.write("*These constraints were plugged into the base Cypher query template*")
-                else:
-                    st.write("No specific constraints needed for this query")
-                    st.info("Query will return all available records")
+                # if ai_constraints:
+                #     st.code(ai_constraints, language="cypher")
+                #     st.write("*These constraints were plugged into the base Cypher query template*")
+                # else:
+                #     st.write("No specific constraints needed for this query")
+                #     st.info("Query will return all available records")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -170,7 +168,7 @@ def main():
                 
                 # Show comparison with traditional approach
                 estimated_traditional_time = processing_ms * 2  # Rough estimate
-                st.write(f"**Optimization Impact:** ~{estimated_traditional_time - processing_ms}ms faster than full query generation")
+                # st.write(f"**Optimization Impact:** ~{estimated_traditional_time - processing_ms}ms faster than full query generation")
                 
                 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -187,8 +185,7 @@ def main():
     st.markdown(
         f"""
         <div style='text-align: center; color: #666;'>
-            Built with Streamlit • Powered by Neo4j, ChromaDB & Gemini AI<br>
-            <small><strong>AI Constraint-Only Mode</strong> • Optimized for performance and cost efficiency</small>
+            Built with Streamlit • Powered by Neo4j, ChromaDB<br>
         </div>
         """,
         unsafe_allow_html=True
@@ -196,3 +193,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
