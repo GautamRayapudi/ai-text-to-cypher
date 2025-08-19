@@ -175,3 +175,4 @@ def process_user_query_hybrid(user_query: str, field_collection, api_key: str):
         # print("[INFO] Falling back to AI-based constraint generation")
         return process_user_query_optimized(user_query, field_collection, api_key)
 
+
