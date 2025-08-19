@@ -124,11 +124,12 @@ Query: "ponds with fcr below 1.3"
 Output: WHERE cropSummary.fcr IS NOT NULL AND cropSummary.fcr < 1.3 AND pond.currentCrop = crop.id
 
 Query: "harvested ponds with abw below 20 and fcr below 1.3"
-Output: WHERE cropSummary.abw IS NOT NULL AND cropSummary.abw < 20 AND cropSummary.fcr IS NOT NULL AND cropSummary.fcr < 1.3 AND crop.harvestReason IS NOT NULL AND pond.currentCrop = crop.id
+Output: WHERE cropSummary.abw IS NOT NULL AND cropSummary.abw < 20 AND cropSummary.fcr IS NOT NULL AND cropSummary.fcr < 1.3 AND crop.harvestReason IS NOT NULL
 
 Query: "all farms"
 Output: 
 
 User query: "{user_query}"
 """
+
 
