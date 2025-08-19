@@ -102,7 +102,7 @@ def extract_field_references(user_query, field_collection):
         potential_fields.add(space_version)
     multiword_patterns = [
         r'\b(?:average|avg)\s+(?:body\s+)?weight(?:\s+gain)?\b',
-        r'\b(?:days?\s+of\s+)?culture(?:\s+days?)?\b', 
+        r'\b(?:days?\s+of\s+)?culture(?:\s+days?)?\b',
         r'\b(?:disease\s+)?health\s+score\b',
         r'\b(?:pond\s+)?(?:carrying\s+)?capacity\b',
         r'\b(?:farm(?:er)?\s+)?name\b',
@@ -120,7 +120,9 @@ def extract_field_references(user_query, field_collection):
         r'\brisk\s+status\b',
         r'\bharvest\s+date\b',
         r'\bharvested\s+date\b',
-        r'\bharvest\b'
+        r'\bharvest\b',
+        r'\b(?:feed\s+)?conversion\s+ratio\b',  # Added for FCR
+        r'\bfcr\b'  # Added for FCR
     ]
     for pattern in multiword_patterns:
         matches = re.findall(pattern, user_query.lower())
@@ -128,7 +130,7 @@ def extract_field_references(user_query, field_collection):
     stop_words = {'show', 'me', 'with', 'the', 'and', 'or', 'is', 'are', 'have', 'has', 'than', 'less', 'more', 'greater', 'above', 'below', 'farms', 'farm', 'crops', 'crop', 'pond', 'ponds', 'who', 'what', 'when', 'where', 'how', 'many', 'most', 'number'}
     words = re.findall(r'\b\w+\b', user_query.lower())
     significant_words = [w for w in words if len(w) > 2 and w not in stop_words]
-    field_indicators = ['weight', 'score', 'days', 'culture', 'feed', 'scale', 'active', 'biomass', 'capacity', 'quantity', 'name', 'acres', 'size', 'stocking', 'brooder', 'hatchery', 'harvest', 'risk', 'date']
+    field_indicators = ['weight', 'score', 'days', 'culture', 'feed', 'scale', 'active', 'biomass', 'capacity', 'quantity', 'name', 'acres', 'size', 'stocking', 'brooder', 'hatchery', 'harvest', 'risk', 'date', 'fcr', 'conversion', 'ratio']
     for word in significant_words:
         if any(indicator in word for indicator in field_indicators):
             potential_fields.add(word)
@@ -138,13 +140,11 @@ def extract_constraints(user_query, field_collection):
     constraints = []
     uq = user_query.lower()
     potential_fields = extract_field_references(user_query, field_collection)
-    
-    # Explicitly check for FCR aliases
-    fcr_aliases = FIELD_ALIASES.get("fcr", []) + ["fcr", "feed conversion ratio"]
     for field_term in potential_fields:
         canonical_field, matched_doc, similarity = match_field(field_term, field_collection)
         
-        # Override for FCR
+        # Explicitly handle FCR
+        fcr_aliases = FIELD_ALIASES.get("fcr", []) + ["fcr", "feed conversion ratio", "feed ratio"]
         if field_term.lower() in [alias.lower() for alias in fcr_aliases]:
             canonical_field = "fcr"
         
@@ -230,5 +230,3 @@ def save_feedback(user_query, cypher_query, reason=None, append_mode=False):
         # Create new dataframe or replace existing one
         st.session_state['feedback_dataframe'] = new_df
         return new_df
-
-
