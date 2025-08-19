@@ -121,21 +121,21 @@ def main():
                 # Display optimization info
                 st.markdown('<div class="optimization-box">', unsafe_allow_html=True)
                 st.success(f"🤖 **Query generation completed** in {processing_ms}ms")
-                st.markdown('</div>', unsafe_allow_html=True)
+                # st.markdown('</div>', unsafe_allow_html=True)
 
                 # Display generated constraints
                 # if show_constraints:
-                st.markdown('<div class="query-box">', unsafe_allow_html=True)
+                # st.markdown('<div class="query-box">', unsafe_allow_html=True)
                 st.subheader("🔍 Generated Constraints")
                 
                 # if ai_constraints:
-                #     st.code(ai_constraints, language="cypher")
+                st.code(ai_constraints, language="cypher")
                 #     st.write("*These constraints were plugged into the base Cypher query template*")
                 # else:
                 #     st.write("No specific constraints needed for this query")
                 #     st.info("Query will return all available records")
                 
-                st.markdown('</div>', unsafe_allow_html=True)
+                # st.markdown('</div>', unsafe_allow_html=True)
 
                 # Execute query against Neo4j
                 with st.spinner("Executing query against Neo4j..."):
@@ -152,7 +152,7 @@ def main():
                 # Show detailed timings if enabled
                 # if show_timings:
                 total_ms = processing_ms + db_ms
-                st.markdown('<div class="query-box">', unsafe_allow_html=True)
+                # st.markdown('<div class="query-box">', unsafe_allow_html=True)
                 st.subheader("⏱️ Performance Metrics")
                 
                 col1, col2, col3 = st.columns(3)
@@ -170,12 +170,12 @@ def main():
                 estimated_traditional_time = processing_ms * 2  # Rough estimate
                 # st.write(f"**Optimization Impact:** ~{estimated_traditional_time - processing_ms}ms faster than full query generation")
                 
-                st.markdown('</div>', unsafe_allow_html=True)
+                # st.markdown('</div>', unsafe_allow_html=True)
 
         except Exception as e:
             st.markdown('<div class="error-box">', unsafe_allow_html=True)
             st.error(f"Error processing query: {str(e)}")
-            st.markdown('</div>', unsafe_allow_html=True)
+            # st.markdown('</div>', unsafe_allow_html=True)
 
     # Always render last results + feedback if available (persists across reruns)
     render_results_and_feedback(debug_on=st.session_state.get("debug_feedback_toggle", False))
@@ -193,5 +193,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
