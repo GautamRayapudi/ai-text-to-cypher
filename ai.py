@@ -109,7 +109,8 @@ def process_user_query_hybrid(user_query: str, field_collection, api_key: str):
         
         field_to_cypher_property = {
             "abw": "cropSummary.abw",
-            "awg": "cropSummary.awg", 
+            "awg": "cropSummary.awg",
+            "fcr": "cropSummary.fcr",
             "dhscore": "dhs.totalScore",
             "aascore": "aascore.totalScore",
             "doc": "crop.doc",
