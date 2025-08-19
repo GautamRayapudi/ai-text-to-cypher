@@ -39,10 +39,10 @@ def initialize_vector_store():
     chroma_client = initialize_chroma_client()
     try:
         collection = chroma_client.get_collection("field_embeddings")
-        st.success("Loaded existing field embeddings from ChromaDB")
+        # st.success("Loaded existing field embeddings from ChromaDB")
         return collection
     except:
-        st.info("Creating new field embeddings collection...")
+        # st.info("Creating new field embeddings collection...")
         collection = chroma_client.create_collection(
             name="field_embeddings",
             metadata={"description": "Field synonyms and aliases for NL to Cypher conversion"}
@@ -62,7 +62,7 @@ def initialize_vector_store():
             metadatas=[{"canonical_field": cf} for cf in canonical_fields],
             ids=[f"field_embedding_{i}" for i in range(len(all_synonyms))]
         )
-        st.success(f"Stored {len(all_synonyms)} field embeddings in ChromaDB")
+        # st.success(f"Stored {len(all_synonyms)} field embeddings in ChromaDB")
         return collection
 
 def match_field(user_term, field_collection, threshold=SIMILARITY_THRESHOLD):
@@ -218,3 +218,4 @@ def save_feedback(user_query, cypher_query, reason=None, append_mode=False):
         # Create new dataframe or replace existing one
         st.session_state['feedback_dataframe'] = new_df
         return new_df
+
