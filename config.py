@@ -108,11 +108,10 @@ Rules:
 4. For farmer names: "(farmer.firstname IS NOT NULL AND farmer.lastname IS NOT NULL AND (farmer.firstname = 'name' OR farmer.lastname = 'name'))"
 5. For numeric string fields (acres, seed, pcc): "toFloat(field) IS NOT NULL AND toFloat(field) > value"
 6. For dates: "field IS NOT NULL AND duration.between(field, date()).days > days" for duration queries
-7. For crop fields, include: "pond.currentCrop = crop.id"
-8. For aggregations, include: "farmer.firstname IS NOT NULL AND farmer.lastname IS NOT NULL"
-9. Don't interpret question words (who, what, when) as values
-10. Quantities: 1k=1000, 1l/1m=1000000, 1b=1000000000
-11. For 'fcr' or 'feed conversion ratio', ALWAYS use cropSummary.fcr and NEVER compute a ratio from totalFeed and totalHarvest
+7. For aggregations, include: "farmer.firstname IS NOT NULL AND farmer.lastname IS NOT NULL"
+8. Don't interpret question words (who, what, when) as values
+9. Quantities: 1k=1000, 1l/1m=1000000, 1b=1000000000
+10. For 'fcr' or 'feed conversion ratio', ALWAYS use cropSummary.fcr and NEVER compute a ratio from totalFeed and totalHarvest
 
 Examples:
 Query: "farms with abw > 10"
@@ -132,3 +131,4 @@ Output:
 
 User query: "{user_query}"
 """
+
