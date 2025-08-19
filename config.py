@@ -2,6 +2,7 @@
 FIELD_ALIASES = {
     "abw": ["average body weight", "avg body weight", "body weight"],
     "awg": ["average weight gain", "avg weight gain", "weight gain"], 
+    "fcr": ["feed conversion ratio", "fcr"],
     "dhscore": ["disease health score", "dh score", "disease score", "health score"],
     "aascore": ["aa score", "aquaculture score"],
     "doc": ["days of culture", "culture days", "doc"],
@@ -77,6 +78,7 @@ You are an expert Neo4j Cypher constraint generator.
 Field mappings:
 - abw: cropSummary.abw
 - awg: cropSummary.awg
+- fcr: cropSummary.fcr
 - dhscore: dhs.totalScore
 - aascore: aascore.totalScore
 - doc: crop.doc
@@ -111,6 +113,7 @@ Rules:
 8. For aggregations, include: "farmer.firstname IS NOT NULL AND farmer.lastname IS NOT NULL"
 9. Don't interpret question words (who, what, when) as values
 10. Quantities: 1k=1000, 1l/1m=1000000, 1b=1000000000
+11. For fields like 'fcr', use the direct mapping (e.g., cropSummary.fcr) and do NOT derive ratios or calculations from other fields
 
 Examples:
 Query: "farms with abw > 10"
@@ -118,6 +121,9 @@ Output: WHERE cropSummary.abw IS NOT NULL AND cropSummary.abw > 10 AND pond.curr
 
 Query: "active crops"
 Output: WHERE crop.isActive IS NOT NULL AND crop.isActive = true AND pond.currentCrop = crop.id
+
+Query: "ponds with fcr below 1.3"
+Output: WHERE cropSummary.fcr IS NOT NULL AND cropSummary.fcr < 1.3 AND pond.currentCrop = crop.id
 
 Query: "all farms"
 Output: 
