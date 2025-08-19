@@ -66,9 +66,9 @@ def process_user_query_optimized(user_query: str, field_collection, api_key: str
     duration_query_detected = False
     if "days" in user_query.lower() or "older" in user_query.lower() or "since" in user_query.lower():
         duration_query_detected = True
-        st.warning(
-            "⚠️ Duration-based queries require Neo4j date types. If your dates are strings, duration calculations may fail."
-        )
+        # st.warning(
+        #     "⚠️ Duration-based queries require Neo4j date types. If your dates are strings, duration calculations may fail."
+        # )
     
     # Generate only the constraints using AI
     t0 = time.perf_counter()
@@ -173,3 +173,4 @@ def process_user_query_hybrid(user_query: str, field_collection, api_key: str):
         # Fall back to AI-based generation for complex queries
         # print("[INFO] Falling back to AI-based constraint generation")
         return process_user_query_optimized(user_query, field_collection, api_key)
+
