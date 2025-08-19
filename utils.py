@@ -138,8 +138,16 @@ def extract_constraints(user_query, field_collection):
     constraints = []
     uq = user_query.lower()
     potential_fields = extract_field_references(user_query, field_collection)
+    
+    # Explicitly check for FCR aliases
+    fcr_aliases = FIELD_ALIASES.get("fcr", []) + ["fcr", "feed conversion ratio"]
     for field_term in potential_fields:
         canonical_field, matched_doc, similarity = match_field(field_term, field_collection)
+        
+        # Override for FCR
+        if field_term.lower() in [alias.lower() for alias in fcr_aliases]:
+            canonical_field = "fcr"
+        
         if field_term.lower() in ["harvest", "harvest date"] and canonical_field == "harvest":
             date_patterns = [
                 r"harvest\s+(before|after|on)\s+[\d-]+\b",
@@ -148,6 +156,7 @@ def extract_constraints(user_query, field_collection):
             ]
             if any(re.search(pattern, uq) for pattern in date_patterns):
                 canonical_field = "harvesteddate"
+        
         if canonical_field and similarity >= SIMILARITY_THRESHOLD:
             field_term_escaped = re.escape(field_term.lower())
             for op in [">=", "<=", ">", "<", "="]:
@@ -172,10 +181,12 @@ def extract_constraints(user_query, field_collection):
                 matches = re.findall(duration_pattern, uq)
                 for val in matches:
                     constraints.append((canonical_field, "duration", val))
+    
     if re.search(r'\bactive\b', uq):
         field, _, similarity = match_field("active", field_collection)
         if field and similarity >= SIMILARITY_THRESHOLD:
             constraints.append((field, "=", "true"))
+    
     farmer_name_patterns = [
         r"(?:farmer|person|user)\s+(?:named|called)?\s*([A-Z][a-zA-Z]+)",
         r"([A-Z][a-zA-Z]+)(?:\s+(?:has|have|owns?))",
@@ -191,6 +202,7 @@ def extract_constraints(user_query, field_collection):
                 if farmer_field and similarity >= SIMILARITY_THRESHOLD:
                     if match.strip().lower() not in ["who", "what", "when", "where", "how"]:
                         constraints.append((farmer_field, "=", match.strip()))
+    
     return constraints
 
 def save_feedback(user_query, cypher_query, reason=None, append_mode=False):
@@ -218,4 +230,5 @@ def save_feedback(user_query, cypher_query, reason=None, append_mode=False):
         # Create new dataframe or replace existing one
         st.session_state['feedback_dataframe'] = new_df
         return new_df
+
 
