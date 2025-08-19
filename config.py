@@ -1,3 +1,4 @@
+# config.py
 FIELD_ALIASES = {
     "abw": ["average body weight", "avg body weight", "body weight"],
     "awg": ["average weight gain", "avg weight gain", "weight gain"],
@@ -112,6 +113,7 @@ Rules:
 8. Don't interpret question words (who, what, when) as values
 9. Quantities: 1k=1000, 1l/1m=1000000, 1b=1000000000
 10. For 'fcr' or 'feed conversion ratio', ALWAYS use cropSummary.fcr and NEVER compute a ratio from totalFeed and totalHarvest
+11. For crop fields, include: "pond.currentCrop = crop.id"
 
 Examples:
 Query: "farms with abw > 10"
@@ -131,5 +133,6 @@ Output:
 
 User query: "{user_query}"
 """
+
 
 
