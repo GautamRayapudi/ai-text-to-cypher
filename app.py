@@ -164,7 +164,7 @@ def main():
                     st.metric("Total Time", f"{total_ms}ms")
                 
                 # Show token efficiency
-                st.info("🤖 Constraint-only approach: ~50% fewer tokens than full query generation")
+                # st.info("🤖 Constraint-only approach: ~50% fewer tokens than full query generation")
                 
                 # Show comparison with traditional approach
                 estimated_traditional_time = processing_ms * 2  # Rough estimate
@@ -193,4 +193,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
