@@ -213,11 +213,8 @@ def save_feedback(user_query, cypher_query, reason=None, append_mode=False):
         existing_df = st.session_state['feedback_dataframe']
         combined_df = pd.concat([existing_df, new_df], ignore_index=True)
         st.session_state['feedback_dataframe'] = combined_df
-        print(f"[DEBUG] Feedback appended to existing DataFrame: query={user_query}, cypher={cypher_query}, reason={reason}")
-        print(f"[DEBUG] Total feedback entries: {len(combined_df)}")
         return combined_df
     else:
         # Create new dataframe or replace existing one
         st.session_state['feedback_dataframe'] = new_df
-        print(f"[DEBUG] New Feedback DataFrame created: query={user_query}, cypher={cypher_query}, reason={reason}")
         return new_df
