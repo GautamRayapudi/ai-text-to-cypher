@@ -1,8 +1,7 @@
-# config.py
 FIELD_ALIASES = {
     "abw": ["average body weight", "avg body weight", "body weight"],
-    "awg": ["average weight gain", "avg weight gain", "weight gain"], 
-    "fcr": ["feed conversion ratio", "fcr"],
+    "awg": ["average weight gain", "avg weight gain", "weight gain"],
+    "fcr": ["feed conversion ratio", "fcr", "feed ratio"],
     "dhscore": ["disease health score", "dh score", "disease score", "health score"],
     "aascore": ["aa score", "aquaculture score"],
     "doc": ["days of culture", "culture days", "doc"],
@@ -36,7 +35,7 @@ for key, values in FIELD_ALIASES.items():
         REVERSE_FIELD_LOOKUP[v.lower()] = key
 
 CROP_FIELDS = {
-    "doc", "seed", "isactive", "stockingdate", "brooder", 
+    "doc", "seed", "isactive", "stockingdate", "brooder",
     "hatcheryname", "harvestreason", "riskstatus", "harvest", "harvesteddate"
 }
 DATE_FIELDS = {"stockingdate", "harvesteddate"}
@@ -58,17 +57,17 @@ OPTIONAL MATCH (farm)-[:HAS_SECTION]-(cycle:Cycle)
 OPTIONAL MATCH (cycle)-[:STOCKED]-(cycleSummary:CycleSummary)
 WITH farm, pond, crop, cropSummary, farmer, hasInsurance, aascore, dhs, cycle, cycleSummary
 {constraints}
-RETURN DISTINCT farm.id AS farmId, farmer.firstname as farmerFirstName, farmer.lastname as farmerLastName, farm.farm_name AS farmName, 
-cycle.id AS sectionId, pond.id AS pondId, pond.name AS pondName, pond.acres AS acres, 
-pond.bearing_capacity AS PCC, crop.stockedOn AS stockingDate, crop.brooder AS brooder, 
-crop.hatchery AS hatcheryName, crop.harvestReason AS harvestReason, 
-hasInsurance, cropSummary.fcr AS FCR, crop.seedQuantity AS seed, crop.pondLevel AS pondLevel, 
-cropSummary.tcf AS totalFeed, cropSummary.smartscaleTCF AS smartScaleKgs, 
-crop.isActive AS isActive, crop.doc AS doc, farm.lastModified AS dataLastUpdated, 
-cropSummary.feedLastUpdatedAt AS feedLastUpdated, cropSummary.nettingLastUpdatedAt AS nettingLastUpdated, 
-cropSummary.abw AS abw, cropSummary.awg AS awg, crop.riskType AS riskStatus, 
-cropSummary.totalHarvest AS harvest, aascore.totalScore AS AAScore, dhs.totalScore AS DHScore, 
-cropSummary.totalOrderedFeed AS totalOrderedFeed, cropSummary.yesterdayFeedBiomass AS yesterdayFeedBiomass, 
+RETURN DISTINCT farm.id AS farmId, farmer.firstname as farmerFirstName, farmer.lastname as farmerLastName, farm.farm_name AS farmName,
+cycle.id AS sectionId, pond.id AS pondId, pond.name AS pondName, pond.acres AS acres,
+pond.bearing_capacity AS PCC, crop.stockedOn AS stockingDate, crop.brooder AS brooder,
+crop.hatchery AS hatcheryName, crop.harvestReason AS harvestReason,
+hasInsurance, cropSummary.fcr AS FCR, crop.seedQuantity AS seed, crop.pondLevel AS pondLevel,
+cropSummary.tcf AS totalFeed, cropSummary.smartscaleTCF AS smartScaleKgs,
+crop.isActive AS isActive, crop.doc AS doc, farm.lastModified AS dataLastUpdated,
+cropSummary.feedLastUpdatedAt AS feedLastUpdated, cropSummary.nettingLastUpdatedAt AS nettingLastUpdated,
+cropSummary.abw AS abw, cropSummary.awg AS awg, crop.riskType AS riskStatus,
+cropSummary.totalHarvest AS harvest, aascore.totalScore AS AAScore, dhs.totalScore AS DHScore,
+cropSummary.totalOrderedFeed AS totalOrderedFeed, cropSummary.yesterdayFeedBiomass AS yesterdayFeedBiomass,
 cropSummary.tcfBiomass AS tcfBiomass, cropSummary.harvestedDate AS harvestedDate"""
 
 # Optimized constraint-only template for Gemini
@@ -113,7 +112,7 @@ Rules:
 8. For aggregations, include: "farmer.firstname IS NOT NULL AND farmer.lastname IS NOT NULL"
 9. Don't interpret question words (who, what, when) as values
 10. Quantities: 1k=1000, 1l/1m=1000000, 1b=1000000000
-11. For fields like 'fcr', use the direct mapping (e.g., cropSummary.fcr) and do NOT derive ratios or calculations from other fields
+11. For 'fcr' or 'feed conversion ratio', ALWAYS use cropSummary.fcr and NEVER compute a ratio from totalFeed and totalHarvest
 
 Examples:
 Query: "farms with abw > 10"
@@ -124,6 +123,9 @@ Output: WHERE crop.isActive IS NOT NULL AND crop.isActive = true AND pond.curren
 
 Query: "ponds with fcr below 1.3"
 Output: WHERE cropSummary.fcr IS NOT NULL AND cropSummary.fcr < 1.3 AND pond.currentCrop = crop.id
+
+Query: "harvested ponds with abw below 20 and fcr below 1.3"
+Output: WHERE cropSummary.abw IS NOT NULL AND cropSummary.abw < 20 AND cropSummary.fcr IS NOT NULL AND cropSummary.fcr < 1.3 AND crop.harvestReason IS NOT NULL AND pond.currentCrop = crop.id
 
 Query: "all farms"
 Output: 
