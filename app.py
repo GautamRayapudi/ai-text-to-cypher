@@ -125,15 +125,15 @@ def main():
                 # Display optimization info with query type
                 st.markdown('<div class="optimization-box">', unsafe_allow_html=True)
                 query_type = "🔢 **Aggregation Query**" if needs_aggregation else "🔍 **Simple Query**"
-                st.success(f"{query_type} processed in {processing_ms}ms")
+                # st.success(f"{query_type} processed in {processing_ms}ms")
                 
-                if needs_aggregation:
-                    st.info("💡 Generated both constraints and aggregation components")
-                else:
-                    st.info("💡 Generated constraints only for optimal performance")
+                # if needs_aggregation:
+                #     st.info("💡 Generated both constraints and aggregation components")
+                # else:
+                #     st.info("💡 Generated constraints only for optimal performance")
 
                 # Display generated components
-                st.subheader("🔍 Generated Query Components")
+                # st.subheader("🔍 Generated Query Components")
                 
                 if ai_constraints:
                     if needs_aggregation:
@@ -142,15 +142,16 @@ def main():
                         constraints_part = [p for p in parts if p.strip().startswith('WHERE')]
                         aggregation_part = [p for p in parts if 'ORDER BY' in p or 'LIMIT' in p]
                         
-                        if constraints_part:
-                            st.write("**Constraints:**")
-                            st.code('\n'.join(constraints_part), language="cypher")
+                    #     if constraints_part:
+                    #         st.write("**Constraints:**")
+                    #         st.code('\n'.join(constraints_part), language="cypher")
                         
-                        if aggregation_part:
-                            st.write("**Aggregation:**")
-                            st.code('\n'.join(aggregation_part), language="cypher")
+                    #     if aggregation_part:
+                    #         st.write("**Aggregation:**")
+                    #         st.code('\n'.join(aggregation_part), language="cypher")
                     else:
-                        st.code(ai_constraints, language="cypher")
+                        pass
+                        # st.code(ai_constraints, language="cypher")
                 else:
                     st.write("No specific constraints needed - returning all records")
 
@@ -180,10 +181,10 @@ def main():
                     st.metric("Total Time", f"{total_ms}ms")
                 
                 # Show efficiency info
-                if needs_aggregation:
-                    st.info("🎯 Dual-component approach: Generated constraints + aggregation efficiently")
-                else:
-                    st.info("⚡ Constraint-only approach: Maximum efficiency for simple queries")
+                # if needs_aggregation:
+                #     st.info("🎯 Dual-component approach: Generated constraints + aggregation efficiently")
+                # else:
+                #     st.info("⚡ Constraint-only approach: Maximum efficiency for simple queries")
 
         except Exception as e:
             st.markdown('<div class="error-box">', unsafe_allow_html=True)
@@ -206,6 +207,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
