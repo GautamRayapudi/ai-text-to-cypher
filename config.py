@@ -1,4 +1,4 @@
-# config.py
+# config.py - Extended version with aggregation support
 FIELD_ALIASES = {
     "abw": ["average body weight", "avg body weight", "body weight"],
     "awg": ["average weight gain", "avg weight gain", "weight gain"],
@@ -134,5 +134,74 @@ Output:
 User query: "{user_query}"
 """
 
+# Template for grouping-based queries (farmers, farms with counts/averages)
+FARMER_AGGREGATION_TEMPLATE = """MATCH (farm:Farm)-[:HAS_POND]->(pond:Pond)-[:HAS_CROP]->(crop:Crop)
+OPTIONAL MATCH (crop)-[:HAS_SUMMARY]->(cropSummary:CropSummary)
+WITH farm, pond, crop, cropSummary
+OPTIONAL MATCH (farmer:Farmer)-[:HAS_FRAM]->(farm)
+WHERE farmer.id = farm.farmer_id
+WITH farm, pond, crop, cropSummary, farmer
+OPTIONAL MATCH (crop)-[:HAS_INSURANCE]-(ins:Insurance)
+WITH farm, pond, crop, cropSummary, farmer, COUNT(ins.id) > 0 AS hasInsurance
+OPTIONAL MATCH (crop)-[:HAS_AASCORE]-(aascore:AAScore)
+WITH farm, pond, crop, cropSummary, farmer, hasInsurance, aascore
+OPTIONAL MATCH (crop)-[:HAS_DHSCORE]->(dhs:DHScore)
+WITH farm, pond, crop, cropSummary, farmer, hasInsurance, aascore, dhs
+OPTIONAL MATCH (farm)-[:HAS_SECTION]-(cycle:Cycle)
+OPTIONAL MATCH (cycle)-[:STOCKED]-(cycleSummary:CycleSummary)
+WITH farm, pond, crop, cropSummary, farmer, hasInsurance, aascore, dhs, cycle, cycleSummary
+{constraints}
+WITH farmer, 
+     COUNT(DISTINCT farm.id) as farmCount,
+     COUNT(DISTINCT pond.id) as pondCount,
+     AVG(cropSummary.abw) as avgABW,
+     AVG(cropSummary.fcr) as avgFCR,
+     SUM(cropSummary.totalHarvest) as totalHarvest
+RETURN farmer.firstname + ' ' + farmer.lastname AS farmerName,
+       farmCount, pondCount, avgABW, avgFCR, totalHarvest
+{aggregation}"""
 
+FARM_AGGREGATION_TEMPLATE = """MATCH (farm:Farm)-[:HAS_POND]->(pond:Pond)-[:HAS_CROP]->(crop:Crop)
+OPTIONAL MATCH (crop)-[:HAS_SUMMARY]->(cropSummary:CropSummary)
+WITH farm, pond, crop, cropSummary
+OPTIONAL MATCH (farmer:Farmer)-[:HAS_FRAM]->(farm)
+WHERE farmer.id = farm.farmer_id
+WITH farm, pond, crop, cropSummary, farmer
+OPTIONAL MATCH (crop)-[:HAS_INSURANCE]-(ins:Insurance)
+WITH farm, pond, crop, cropSummary, farmer, COUNT(ins.id) > 0 AS hasInsurance
+OPTIONAL MATCH (crop)-[:HAS_AASCORE]-(aascore:AAScore)
+WITH farm, pond, crop, cropSummary, farmer, hasInsurance, aascore
+OPTIONAL MATCH (crop)-[:HAS_DHSCORE]->(dhs:DHScore)
+WITH farm, pond, crop, cropSummary, farmer, hasInsurance, aascore, dhs
+OPTIONAL MATCH (farm)-[:HAS_SECTION]-(cycle:Cycle)
+OPTIONAL MATCH (cycle)-[:STOCKED]-(cycleSummary:CycleSummary)
+WITH farm, pond, crop, cropSummary, farmer, hasInsurance, aascore, dhs, cycle, cycleSummary
+{constraints}
+WITH farm, farmer,
+     COUNT(DISTINCT pond.id) as pondCount,
+     AVG(cropSummary.abw) as avgABW,
+     AVG(cropSummary.fcr) as avgFCR,
+     SUM(cropSummary.totalHarvest) as totalHarvest
+RETURN farm.farm_name AS farmName,
+       farmer.firstname + ' ' + farmer.lastname AS farmerName,
+       pondCount, avgABW, avgFCR, totalHarvest
+{aggregation}"""
 
+# Query type detection patterns
+AGGREGATION_KEYWORDS = [
+    'top', 'highest', 'lowest', 'most', 'least', 'best', 'worst',
+    'largest', 'smallest', 'first', 'last', 'count', 'average',
+    'sum', 'max', 'min', 'group by', 'sort', 'order'
+]
+
+FARMER_GROUPING_PATTERNS = [
+    'which farmer', 'farmer has most', 'farmer with highest',
+    'farmer with lowest', 'farmers by', 'farmers with most',
+    'farmers with highest', 'farmers with lowest'
+]
+
+FARM_GROUPING_PATTERNS = [
+    'which farm', 'farm has most', 'farm with highest',
+    'farm with lowest', 'farms by', 'farms with most',
+    'farms with highest', 'farms with lowest'
+]
