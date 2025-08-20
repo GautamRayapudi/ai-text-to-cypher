@@ -123,7 +123,7 @@ def main():
                 st.session_state.total_processing_time_ms += processing_ms
 
                 # Display optimization info with query type
-                st.markdown('<div class="optimization-box">', unsafe_allow_html=True)
+                # st.markdown('<div class="optimization-box">', unsafe_allow_html=True)
                 query_type = "🔢 **Aggregation Query**" if needs_aggregation else "🔍 **Simple Query**"
                 # st.success(f"{query_type} processed in {processing_ms}ms")
                 
@@ -207,6 +207,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
