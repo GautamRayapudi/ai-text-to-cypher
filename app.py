@@ -106,14 +106,10 @@ def main():
     # Execute new query
     if query_button and user_query.strip():
         try:
-            with st.spinner("Analyzing query type and generating components..."):
+            with st.spinner("Generating optimized constraints..."):
                 t_total_start = time.perf_counter()
                 
-                # Detect query type
-                from ai import detect_aggregation_query
-                needs_aggregation = detect_aggregation_query(user_query)
-                
-                # Use the optimized approach with aggregation support
+                # Use AI-only constraint generation
                 cypher_query, ai_constraints = process_user_query_optimized(user_query, field_collection, api_key)
                 
                 t_processing_end = time.perf_counter()
@@ -122,38 +118,24 @@ def main():
                 # Update processing time tracking
                 st.session_state.total_processing_time_ms += processing_ms
 
-                # Display optimization info with query type
-                # st.markdown('<div class="optimization-box">', unsafe_allow_html=True)
-                query_type = "🔢 **Aggregation Query**" if needs_aggregation else "🔍 **Simple Query**"
-                # st.success(f"{query_type} processed in {processing_ms}ms")
-                
-                # if needs_aggregation:
-                #     st.info("💡 Generated both constraints and aggregation components")
-                # else:
-                #     st.info("💡 Generated constraints only for optimal performance")
+                # Display optimization info
+                st.markdown('<div class="optimization-box">', unsafe_allow_html=True)
+                st.success(f"🤖 **Query generation completed** in {processing_ms}ms")
+                # st.markdown('</div>', unsafe_allow_html=True)
 
-                # Display generated components
-                # st.subheader("🔍 Generated Query Components")
+                # Display generated constraints
+                # if show_constraints:
+                # st.markdown('<div class="query-box">', unsafe_allow_html=True)
+                st.subheader("🔍 Generated Constraints")
                 
-                if ai_constraints:
-                    if needs_aggregation:
-                        # Split and display constraints and aggregation separately if both exist
-                        parts = ai_constraints.split('\n')
-                        constraints_part = [p for p in parts if p.strip().startswith('WHERE')]
-                        aggregation_part = [p for p in parts if 'ORDER BY' in p or 'LIMIT' in p]
-                        
-                    #     if constraints_part:
-                    #         st.write("**Constraints:**")
-                    #         st.code('\n'.join(constraints_part), language="cypher")
-                        
-                    #     if aggregation_part:
-                    #         st.write("**Aggregation:**")
-                    #         st.code('\n'.join(aggregation_part), language="cypher")
-                    else:
-                        pass
-                        # st.code(ai_constraints, language="cypher")
-                else:
-                    st.write("No specific constraints needed - returning all records")
+                # if ai_constraints:
+                st.code(ai_constraints, language="cypher")
+                #     st.write("*These constraints were plugged into the base Cypher query template*")
+                # else:
+                #     st.write("No specific constraints needed for this query")
+                #     st.info("Query will return all available records")
+                
+                # st.markdown('</div>', unsafe_allow_html=True)
 
                 # Execute query against Neo4j
                 with st.spinner("Executing query against Neo4j..."):
@@ -167,29 +149,33 @@ def main():
                 st.session_state.last_query_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 set_results_state(user_query, cypher_query, records)
                 
-                # Show performance metrics
+                # Show detailed timings if enabled
+                # if show_timings:
                 total_ms = processing_ms + db_ms
+                # st.markdown('<div class="query-box">', unsafe_allow_html=True)
                 st.subheader("⏱️ Performance Metrics")
                 
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    metric_label = "Component Generation" if needs_aggregation else "Constraint Generation"
-                    st.metric(metric_label, f"{processing_ms}ms")
+                    st.metric("Constraint Generation", f"{processing_ms}ms")
                 with col2:
                     st.metric("Database Execution", f"{db_ms}ms")
                 with col3:
                     st.metric("Total Time", f"{total_ms}ms")
                 
-                # Show efficiency info
-                # if needs_aggregation:
-                #     st.info("🎯 Dual-component approach: Generated constraints + aggregation efficiently")
-                # else:
-                #     st.info("⚡ Constraint-only approach: Maximum efficiency for simple queries")
+                # Show token efficiency
+                # st.info("🤖 Constraint-only approach: ~50% fewer tokens than full query generation")
+                
+                # Show comparison with traditional approach
+                estimated_traditional_time = processing_ms * 2  # Rough estimate
+                # st.write(f"**Optimization Impact:** ~{estimated_traditional_time - processing_ms}ms faster than full query generation")
+                
+                # st.markdown('</div>', unsafe_allow_html=True)
 
         except Exception as e:
             st.markdown('<div class="error-box">', unsafe_allow_html=True)
             st.error(f"Error processing query: {str(e)}")
-            st.markdown('</div>', unsafe_allow_html=True)
+            # st.markdown('</div>', unsafe_allow_html=True)
 
     # Always render last results + feedback if available (persists across reruns)
     render_results_and_feedback(debug_on=st.session_state.get("debug_feedback_toggle", False))
@@ -207,8 +193,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
